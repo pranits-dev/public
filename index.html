@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mendi Coat - Download</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --bg: #f4f7f6;
+            --text: #333;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 { color: var(--secondary); font-size: 2.5rem; margin-bottom: 10px; }
+        .tagline { color: #7f8c8d; font-size: 1.2rem; margin-bottom: 30px; }
+        
+        .download-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 40px 0;
+        }
+        @media (max-width: 600px) {
+            .download-box { grid-template-columns: 1fr; }
+        }
+        
+        .btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--secondary);
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            border-color: var(--primary);
+            background: #f0f8ff;
+            transform: translateY(-5px);
+        }
+        .btn.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .btn-icon { font-size: 3rem; margin-bottom: 10px; }
+        .btn-text { font-weight: bold; font-size: 1.1rem; }
+        .version-tag {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .instructions {
+            text-align: left;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .instructions h3 { margin-top: 0; }
+        #loading { font-style: italic; color: #95a5a6; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎴 Mendi Coat</h1>
+        <p class="tagline">The classic trick-taking game, now on your desktop.</p>
+
+        <div id="loading">Fetching latest version...</div>
+
+        <div class="download-box" id="downloadArea" style="display: none;">
+            <!-- Windows -->
+            <a href="#" id="winLink" class="btn">
+                <span class="btn-icon">🪟</span>
+                <span class="btn-text">Download for Windows</span>
+                <span id="winSize" style="font-size: 0.8rem; color: #7f8c8d;"></span>
+            </a>
+
+            <!-- Linux -->
+            <a href="#" id="linuxLink" class="btn">
+                <span class="btn-icon">🐧</span>
+                <span class="btn-text">Download for Linux</span>
+                <span id="linuxSize" style="font-size: 0.8rem; color: #7f8c8d;"></span>
+            </a>
+        </div>
+
+        <div id="versionInfo" class="version-tag" style="display: none;">Latest: v1.0.0</div>
+
+        <div class="instructions">
+            <h3>How to Play</h3>
+            <ol>
+                <li>Download the file for your operating system.</li>
+                <li><strong>Windows:</strong> Just run the <code>.exe</code> file.</li>
+                <li><strong>Linux:</strong> Right-click the <code>.AppImage</code>, go to Properties > Permissions, and check "Allow executing file as program". Then run it.</li>
+                <li>Ensure all players are on the same <strong>Wi-Fi network</strong>.</li>
+                <li>One player clicks <strong>Host</strong>, others use the IP address shown to <strong>Join</strong>.</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION: Replace with your actual Github Username and Public Repo name
+        const GITHUB_USER = 'pranits-dev';
+        const GITHUB_REPO = 'public';
+
+        async function fetchLatestRelease() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/releases/latest`);
+                if (!response.ok) throw new Error('Release not found');
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('downloadArea').style.display = 'grid';
+                
+                const versionTag = document.getElementById('versionInfo');
+                versionTag.innerText = `Latest Release: ${data.tag_name}`;
+                versionTag.style.display = 'inline-block';
+
+                data.assets.forEach(asset => {
+                    if (asset.name.endsWith('.exe')) {
+                        const winLink = document.getElementById('winLink');
+                        winLink.href = asset.browser_download_url;
+                        document.getElementById('winSize').innerText = `${(asset.size / 1024 / 1024).toFixed(1)} MB`;
+                    }
+                    if (asset.name.endsWith('.AppImage')) {
+                        const linuxLink = document.getElementById('linuxLink');
+                        linuxLink.href = asset.browser_download_url;
+                        document.getElementById('linuxSize').innerText = `${(asset.size / 1024 / 1024).toFixed(1)} MB`;
+                    }
+                });
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading').innerText = 'Error loading latest release. Please check back later.';
+            }
+        }
+
+        fetchLatestRelease();
+    </script>
+</body>
+</html>
